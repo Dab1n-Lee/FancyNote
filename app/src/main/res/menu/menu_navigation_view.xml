@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/navi_item_setPw"
+        android:title="@string/navi_first_item"
+        app:actionViewClass="android.widget.CheckBox"/>
+
+    <item
+        android:id="@+id/navi_item_trash"
+        android:title="@string/navi_second_item"/>
+
+    <item
+        android:id="@+id/navi_item_inquiry"
+        android:title="@string/navi_third_item"/>
+
+</menu>
