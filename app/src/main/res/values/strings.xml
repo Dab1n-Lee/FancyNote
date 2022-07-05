@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">FancyNote</string>
-    <string name="navi_first_item">잠금 설정</string>
+    <string name="navi_first_item">비밀번호 설정</string>
     <string name="navi_second_item">쓰레기통</string>
-    <string name="navi_third_item">고객센터</string>
+    <string name="navi_third_item">개발자 정보</string>
+    <string name="navi_item_remove">비밀번호 해제</string>
 </resources>

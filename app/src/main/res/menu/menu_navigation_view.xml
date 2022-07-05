@@ -5,14 +5,15 @@
     <item
         android:id="@+id/navi_item_setPw"
         android:title="@string/navi_first_item"
-        app:actionViewClass="android.widget.CheckBox"/>
-
+        app:actionViewClass="android.widget.Switch"/>
     <item
-        android:id="@+id/navi_item_trash"
-        android:title="@string/navi_second_item"/>
+        android:id="@+id/navi_item_remove"
+        android:title="@string/navi_item_remove"/>
 
     <item
         android:id="@+id/navi_item_inquiry"
         android:title="@string/navi_third_item"/>
+
+
 
 </menu>

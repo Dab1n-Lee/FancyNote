@@ -24,7 +24,9 @@
         android:textColor="@color/black"
         android:hint="제목을 입력하세요"
         android:textColorHint="@color/grey"
-        android:textSize="20sp"/>
+        android:textSize="20sp"
+        android:singleLine="true"
+        android:lines="1"/>
 
     <EditText
         android:id="@+id/et_content"

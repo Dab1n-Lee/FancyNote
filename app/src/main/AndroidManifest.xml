@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.fancynote">
 
+    <uses-permission android:name="android.permission.VIBRATE" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -14,10 +16,19 @@
         android:theme="@style/Theme.FancyNote"
         tools:targetApi="31">
         <activity
-            android:name=".AddMemo"
+            android:name=".Remove_Password"
             android:exported="false" />
         <activity
             android:name=".PwVerification"
+            android:exported="false" />
+        <activity
+            android:name=".PasswordInsert"
+            android:exported="false" />
+        <activity
+            android:name=".Inquiry"
+            android:exported="false" />
+        <activity
+            android:name=".AddMemo"
             android:exported="false" />
         <activity
             android:name=".setPwActivity"

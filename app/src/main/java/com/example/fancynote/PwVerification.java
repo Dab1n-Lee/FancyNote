@@ -2,12 +2,16 @@ package com.example.fancynote;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Button;
+import android.widget.EditText;
 
 public class PwVerification extends AppCompatActivity {
 
-    private PwDatabase database;
-    private pwDAO pwDao;
+    EditText et_first,et_second,et_third, et_fourth;
+    Button btn_setting;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -16,9 +20,28 @@ public class PwVerification extends AppCompatActivity {
 
 
 
-        // Splash Screen 에다가 로직을 잔뜩 짜게 될 경우 Animation 이 렉이 걸린다.
-        // 그러므로 PwVerification.class 에다가 비밀번호가 있는지? 없는지? 에 관한 로직을 구현한다음
-        // SplashScreen 에서는 그냥 StartActivityForResult 를 통해서 구현을 한 다음에
-        // 반환을 하는 것으로 해서, MainActivity 또는, 잠금 해제 화면으로 갈 수 있도록 한다.
+        et_first = findViewById(R.id.et_first);
+        et_second = findViewById(R.id.et_second);
+        et_third = findViewById(R.id.et_third);
+        et_fourth = findViewById(R.id.et_fourth);
+        btn_setting = findViewById(R.id.btn_setting);
+
+        et_first.addTextChangedListener(new CustomTextWatcher(et_second, et_first));
+        et_second.addTextChangedListener(new CustomTextWatcher(et_third, et_first));
+        et_third.addTextChangedListener(new CustomTextWatcher(et_fourth,et_second));
+
+        btn_setting.setOnClickListener((v)->{
+
+            if (et_first.getText().toString() != null && et_second.getText().toString() != null && et_third.getText().toString() != null && et_fourth.getText().toString() != null) {
+                String a = et_first.getText().toString()+et_second.getText().toString()+et_third.getText().toString()+et_fourth.getText().toString();
+                Intent intent = new Intent();
+                intent.putExtra("result", a);
+                setResult(RESULT_OK, intent);
+                finish();
+            }
+
+        });
+
+
     }
 }

@@ -1,10 +1,12 @@
 package com.example.fancynote;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -14,6 +16,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
@@ -37,29 +40,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private NavigationView navigationView;
     private final int REQUEST_SET_PW = 1;
     private MenuItem navi_item_setPw;
+    private final int REQUEST_PW_REMOVE = 1579;
+    private boolean isLocked = false;
 
 
     private Animation rotateOpen,rotateClose,fromBottom,toBottom;
     private boolean clicked = false;
 
     private Toolbar toolbar;
+    private ArrayList<MemoItem> list;
+    private ArrayList<String> uidList;
 
 
     private RecyclerView recyclerView;
     private Adapter adapter;
 
     private DatabaseReference database = FirebaseDatabase.getInstance().getReference();
-    private DatabaseReference note = database.child("note");
+    private DatabaseReference note;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        Intent intent = getIntent();
-        String title = intent.getStringExtra("title");
-        String content = intent.getStringExtra("content");
 
 
         /** 데이터 베이스 구현부 종료 **/
@@ -82,7 +85,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         fab_main.setOnClickListener((v)->{
             onAddButtonClicked();
-
         });
 
         navigationView = findViewById(R.id.navigationView);
@@ -93,7 +95,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (navigationView != null) {
             navigationView.setNavigationItemSelectedListener(this);
         }
-        
+
         fab_sub1.setOnClickListener((v)->{
             Intent intent1 = new Intent(getApplicationContext(), AddMemo.class);
             startActivity(intent1);
@@ -106,23 +108,84 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         //folding Animation 구현부
         recyclerView = findViewById(R.id.recyclerview);
 
+        Intent intent1 = getIntent();
+        String id = intent1.getStringExtra("id");
+
+        note = database.child("note");
+
+        list = new ArrayList<>();
+        uidList = new ArrayList<>();
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(linearLayoutManager);
+        recyclerView.setHasFixedSize(true);
         recyclerView.setFocusable(false);
-
         adapter = new Adapter(MainActivity.this);
         recyclerView.setAdapter(adapter);
-        ArrayList<MemoItem> list = new ArrayList<>();
 
-        note.addListenerForSingleValueEvent(new ValueEventListener() {
+        // swipe 하여 RecyclerView 뿐만 아니라 데이터베이스의 데이터 까지 삭제 적용.
+        // 하기 위한 ID 저장 List
+        note.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                uidList.clear();
+                for (DataSnapshot ds:snapshot.getChildren()) {
+                    String uidKey = ds.getKey();
+                    uidList.add(uidKey);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("Uid Collect Method", error.getMessage());
+            }
+        });
+
+
+
+        ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0,
+                ItemTouchHelper.RIGHT | ItemTouchHelper.LEFT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+            // database Reference 의 child 에서 선택한 position에 해당하는 id 값을 삭제하는 메소드
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                final int position = viewHolder.getBindingAdapterPosition();
+                note.child(uidList.get(position)).removeValue();
+                note.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        list.clear();
+                        for (DataSnapshot datasnap:snapshot.getChildren()) {
+                            MemoItem memoItem = datasnap.getValue(MemoItem.class);
+                            list.add(memoItem);
+                        }
+                        adapter.notifyDataSetChanged();
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Log.e("MainActivity", error.getMessage());
+                    }
+                });
+            }
+        };
+
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
+        itemTouchHelper.attachToRecyclerView(recyclerView);
+
+        note.addListenerForSingleValueEvent(new ValueEventListener() {
+
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                list.clear();
                 for (DataSnapshot dataSnapshot:snapshot.getChildren()) {
                     MemoItem memoItem = dataSnapshot.getValue(MemoItem.class);
                     list.add(memoItem);
                 }
+                adapter.notifyDataSetChanged();
             }
-
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Log.e("MainActivity", error.getMessage());
@@ -130,6 +193,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         adapter.setDataToAdapter(list);
+
+
     }
 
 
@@ -144,12 +209,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     // 만약 앱바(Appbar)에 표시된 액션 또는 오버플로우 메뉴가 선택되면
     // 액티비티 onOptionItemSelected() Method가 호출
     @SuppressLint("NonConstantResourceId")
+
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
                 drawer_main.openDrawer(GravityCompat.START);
-                // 만약에 좌측의 dehaze 버튼 클릭시의 drawer 페이지 구현부
                 return true;
             case R.id.menu_item1:
                 return true;
@@ -158,6 +223,30 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    /*** 네비게이션 드로어 Item Click Listener 구현부 ***/
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+
+        switch (id) {
+            case R.id.navi_item_setPw:
+            Intent intent = new Intent(getApplicationContext(), PasswordInsert.class);
+                startActivity(intent);
+                return true;
+            case R.id.navi_item_remove:
+                Intent intent2 = new Intent(MainActivity.this, SplashScreen.class);
+                intent2.putExtra("request", "remove");
+                startActivityForResult(intent2, REQUEST_PW_REMOVE);
+                return true;
+
+            case R.id.navi_item_inquiry:
+                Intent intent1 = new Intent(getApplicationContext(), Inquiry.class);
+                startActivity(intent1);
+                return true;
+        }
+        return true;
     }
 
     // 뒤로가기 버튼에 대한 정의
@@ -216,30 +305,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             fab_main.startAnimation(rotateClose);
         }
     }
-    
-    
-    
-    /*** 네비게이션 드로어 Item Click Listener 구현부 ***/
+
     @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        int id = item.getItemId();
-
-        switch (id) {
-            case R.id.navi_item_setPw:
-                Intent intent = new Intent(getApplicationContext(), setPwActivity.class);
-                startActivityForResult(intent,REQUEST_SET_PW);
-                navi_item_setPw.setChecked(true);
-                return true;
-            case R.id.navi_item_trash:
-                Toast.makeText(this, "trash?", Toast.LENGTH_SHORT).show();
-                return true;
-            case R.id.navi_item_inquiry:
-                Toast.makeText(this, "inquiry", Toast.LENGTH_SHORT).show();
-                return true;
-            default:
-                return false;
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_PW_REMOVE) {
+            if (resultCode == RESULT_CANCELED) {
+                Toast.makeText(this, "설정되어 있는 비밀번호가 없습니다.", Toast.LENGTH_SHORT).show();
+            } else if (resultCode == RESULT_OK) {
+                Intent intent = new Intent(MainActivity.this, Remove_Password.class);
+                startActivity(intent);
+                finishAffinity();
+            }
         }
-
     }
-
 }

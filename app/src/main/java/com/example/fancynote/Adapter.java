@@ -1,13 +1,16 @@
 package com.example.fancynote;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.ramotion.foldingcell.FoldingCell;
@@ -28,12 +31,16 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ItemViewHolder> {
         notifyDataSetChanged();
     }
 
+
+
+
     @NonNull
     @Override
     public Adapter.ItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.memo_layout, parent, false);
         return new ItemViewHolder(view);
     }
+
 
     @Override
     public void onBindViewHolder(@NonNull Adapter.ItemViewHolder holder, int position) {
@@ -48,7 +55,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ItemViewHolder> {
 
     @Override
     public int getItemCount() {
-        return memoItemArrayList.size();
+        return memoItemArrayList != null ? memoItemArrayList.size() : 0;
     }
 
     public class ItemViewHolder extends RecyclerView.ViewHolder {
@@ -67,8 +74,8 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ItemViewHolder> {
             imageView = itemView.findViewById(R.id.imageView);
 
         }
-    }
 
+    }
 
 
 }

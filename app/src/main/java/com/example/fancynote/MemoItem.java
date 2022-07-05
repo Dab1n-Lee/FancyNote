@@ -1,8 +1,10 @@
 package com.example.fancynote;
 
 public class MemoItem {
-    private String title;
-    private String content;
+    String title;
+    String content;
+
+    public MemoItem(){}
 
     public MemoItem(String title, String content) {
         this.title = title;
@@ -24,5 +26,6 @@ public class MemoItem {
     public void setContent(String content) {
         this.content = content;
     }
+
 }
 
