@@ -11,6 +11,7 @@ import android.os.Vibrator;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -18,10 +19,10 @@ import android.widget.Toast;
 
 public class PasswordInsert extends AppCompatActivity {
 
-    EditText et_first,et_second,et_third,et_fourth;
-    TextView tv_info;
-    Button btn_setting;
-    String a,b;
+    private EditText et_first,et_second,et_third,et_fourth;
+    private TextView tv_info;
+    private Button btn_setting;
+    private String a,b;
     private final int REQUEST_SETTING_PW = 789;
 
     @Override
@@ -41,9 +42,10 @@ public class PasswordInsert extends AppCompatActivity {
 
 
 
-        et_first.addTextChangedListener(new CustomTextWatcher(et_second, et_first));
-        et_second.addTextChangedListener(new CustomTextWatcher(et_third, et_first));
-        et_third.addTextChangedListener(new CustomTextWatcher(et_fourth, et_second));
+        et_first.addTextChangedListener(new CustomTextWatcher(et_first,et_second));
+        et_second.addTextChangedListener(new CustomTextWatcher(et_second,et_third));
+        et_third.addTextChangedListener(new CustomTextWatcher(et_third,et_fourth));
+        et_fourth.addTextChangedListener(new CustomTextWatcher(et_fourth, et_fourth));
 
         btn_setting.setOnClickListener((v)->{
             if (et_first.getText().toString() != null && et_second.getText().toString() != null && et_third.getText().toString() != null && et_fourth.getText().toString() != null) {
@@ -59,7 +61,7 @@ public class PasswordInsert extends AppCompatActivity {
                     if (et_first.getText().toString() != null && et_second.getText().toString() != null && et_third.getText().toString() != null && et_fourth.getText().toString() != null) {
                         b = et_first.getText().toString() + et_second.getText().toString() + et_third.getText().toString() + et_fourth.getText().toString();
                         if (a.equals(b)) {
-                            Intent intent = new Intent(PasswordInsert.this, SplashScreen.class);
+                            Intent intent = new Intent(PasswordInsert.this, PwVerification.class);
                             intent.putExtra("settingPw", b);
                             startActivityForResult(intent,REQUEST_SETTING_PW);
                         }
@@ -91,8 +93,7 @@ public class PasswordInsert extends AppCompatActivity {
 }
 
 class CustomTextWatcher implements TextWatcher {
-    
-    View v, v1;
+    private View v,v1;
 
     public CustomTextWatcher(View v, View v1) {
         this.v = v;
@@ -106,15 +107,25 @@ class CustomTextWatcher implements TextWatcher {
 
     @Override
     public void onTextChanged(CharSequence s, int start, int before, int count) {
-        if (s.length() == 1) {
-            v.requestFocus();
-        } else if (s.length() == 0) {
-            v1.requestFocus();
-        }
     }
 
     @Override
     public void afterTextChanged(Editable s) {
+        String text = s.toString();
+        if (v.getId() == R.id.et_first) {
+            v.clearFocus();
+            v1.requestFocus();
+        }else if (v.getId() == R.id.et_second) {
+            v.clearFocus();
+            v1.requestFocus();
+        } else if (v.getId() == R.id.et_third) {
+            v.clearFocus();
+            v1.requestFocus();
+        } else if (v.getId() == R.id.et_fourth) {
+            v.clearFocus();
+            v1.requestFocus();
+        }
+
 
     }
 }

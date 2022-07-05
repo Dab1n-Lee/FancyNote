@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -42,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private MenuItem navi_item_setPw;
     private final int REQUEST_PW_REMOVE = 1579;
     private boolean isLocked = false;
+    private Vibrator vi;
 
 
     private Animation rotateOpen,rotateClose,fromBottom,toBottom;
@@ -82,6 +84,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         rotateClose = AnimationUtils.loadAnimation(MainActivity.this, R.anim.rotate_close_anim);
         fromBottom = AnimationUtils.loadAnimation(MainActivity.this, R.anim.from_bottom_anim);
         toBottom = AnimationUtils.loadAnimation(MainActivity.this, R.anim.to_bottom_anim);
+        vi = (Vibrator) getSystemService(VIBRATOR_SERVICE);
 
         fab_main.setOnClickListener((v)->{
             onAddButtonClicked();
@@ -152,6 +155,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
                 final int position = viewHolder.getBindingAdapterPosition();
+                vi.vibrate(200);
                 note.child(uidList.get(position)).removeValue();
                 note.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
@@ -232,18 +236,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         switch (id) {
             case R.id.navi_item_setPw:
-            Intent intent = new Intent(getApplicationContext(), PasswordInsert.class);
-                startActivity(intent);
+                Intent intent = new Intent(MainActivity.this, PwVerification.class);
+                intent.putExtra("request1", "insert");
+                startActivityForResult(intent, REQUEST_SET_PW);
                 return true;
             case R.id.navi_item_remove:
-                Intent intent2 = new Intent(MainActivity.this, SplashScreen.class);
-                intent2.putExtra("request", "remove");
-                startActivityForResult(intent2, REQUEST_PW_REMOVE);
+                Intent intent1 = new Intent(MainActivity.this, PwVerification.class);
+                intent1.putExtra("request2", "remove");
+                startActivityForResult(intent1, REQUEST_PW_REMOVE);
                 return true;
 
             case R.id.navi_item_inquiry:
-                Intent intent1 = new Intent(getApplicationContext(), Inquiry.class);
-                startActivity(intent1);
+                Intent intent2 = new Intent(getApplicationContext(), Inquiry.class);
+                startActivity(intent2);
                 return true;
         }
         return true;
@@ -309,13 +314,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_PW_REMOVE) {
+        if (requestCode == REQUEST_SET_PW) {
             if (resultCode == RESULT_CANCELED) {
-                Toast.makeText(this, "설정되어 있는 비밀번호가 없습니다.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "이미 비밀번호가 설정되어 있습니다.", Toast.LENGTH_SHORT).show();
             } else if (resultCode == RESULT_OK) {
+                Intent intent = new Intent(MainActivity.this, PasswordInsert.class);
+                startActivity(intent);
+            }
+        }else if (requestCode == REQUEST_PW_REMOVE) {
+            if (resultCode == RESULT_OK) {
                 Intent intent = new Intent(MainActivity.this, Remove_Password.class);
                 startActivity(intent);
-                finishAffinity();
+            } else {
+                Toast.makeText(this, "비밀번호가 설정되어 있지 않습니다.", Toast.LENGTH_SHORT).show();
             }
         }
     }
