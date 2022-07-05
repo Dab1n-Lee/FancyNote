@@ -50,9 +50,11 @@ public class SplashScreen extends AppCompatActivity {
                 Intent intent = new Intent(SplashScreen.this, MainActivity.class);
                 startActivity(intent);
                 finishAffinity();
-            } else {
+            } else if (resultCode == RESULT_OK) {
                 Intent intent = new Intent(SplashScreen.this, MainActivity.class);
                 startActivity(intent);
+                finishAffinity();
+            } else {
                 finishAffinity();
             }
         }

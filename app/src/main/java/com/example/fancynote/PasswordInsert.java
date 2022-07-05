@@ -126,6 +126,6 @@ class CustomTextWatcher implements TextWatcher {
             v1.requestFocus();
         }
 
-
     }
+
 }

@@ -104,7 +104,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             startActivity(intent1);
         });
         fab_sub2.setOnClickListener((v)->{
-            Toast.makeText(this, "sub2가 클릭되었습니다.", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(getApplicationContext(), CameraActivity.class);
+            startActivity(intent);
         });
 
 

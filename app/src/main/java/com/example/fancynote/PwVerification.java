@@ -25,6 +25,13 @@ public class PwVerification extends AppCompatActivity {
 
 
     @Override
+    public void onBackPressed() {
+        setResult(RESULT_FIRST_USER);
+        finish();
+        super.onBackPressed();
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pw_verification);
