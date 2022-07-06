@@ -12,6 +12,7 @@
         android:background="@color/purple_200"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         app:menu="@menu/menu_toolbar">
+        <!-- 나중에 고도화 할 때, app:menu="@menu/menu_toolbar" 를 추가할 것-->
 
     </androidx.appcompat.widget.Toolbar>
 </LinearLayout>

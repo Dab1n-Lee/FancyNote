@@ -53,7 +53,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private MemoItem memoItem;
     private Intent intent;
     private final int REQUEST_CAMERA = 569;
-    private ImageIncludeAdapter imageIncludeAdapter;
 
 
     private Animation rotateOpen,rotateClose,fromBottom,toBottom;
@@ -232,10 +231,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case android.R.id.home:
                 drawer_main.openDrawer(GravityCompat.START);
                 return true;
-            case R.id.menu_item1:
+            /** case R.id.menu_item1:
                 return true;
             case R.id.menu_item2:
-                return true;
+                return true;**/
             default:
                 return super.onOptionsItemSelected(item);
         }
