@@ -4,16 +4,22 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -33,7 +39,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener{
 
     private long backKeyPressedTime = 0;
     private FloatingActionButton fab_main,fab_sub1, fab_sub2;
@@ -44,6 +50,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private final int REQUEST_PW_REMOVE = 1579;
     private boolean isLocked = false;
     private Vibrator vi;
+    private MemoItem memoItem;
+    private Intent intent;
+    private final int REQUEST_CAMERA = 569;
+    private ImageIncludeAdapter imageIncludeAdapter;
 
 
     private Animation rotateOpen,rotateClose,fromBottom,toBottom;
@@ -66,6 +76,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        /** 마시멜로우 이상 버전일 경우, 외부 저장소 읽기, 쓰기 및 카메라 이용 권한 체크 후 권한요청 **/
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.CAMERA) ==
+                    PackageManager.PERMISSION_GRANTED &&
+                    checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+                            == checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+
+            } else {
+                ActivityCompat.requestPermissions(this, new String[]
+                        {Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+            }
+        }
+
 
         /** 데이터 베이스 구현부 종료 **/
 
@@ -86,9 +109,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         toBottom = AnimationUtils.loadAnimation(MainActivity.this, R.anim.to_bottom_anim);
         vi = (Vibrator) getSystemService(VIBRATOR_SERVICE);
 
-        fab_main.setOnClickListener((v)->{
-            onAddButtonClicked();
-        });
+        fab_main.setOnClickListener(this::onClick);
+        fab_sub1.setOnClickListener(this::onClick);
+        fab_sub2.setOnClickListener(this::onClick);
 
         navigationView = findViewById(R.id.navigationView);
 
@@ -98,16 +121,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (navigationView != null) {
             navigationView.setNavigationItemSelectedListener(this);
         }
-
-        fab_sub1.setOnClickListener((v)->{
-            Intent intent1 = new Intent(getApplicationContext(), AddMemo.class);
-            startActivity(intent1);
-        });
-        fab_sub2.setOnClickListener((v)->{
-            Intent intent = new Intent(getApplicationContext(), CameraActivity.class);
-            startActivity(intent);
-        });
-
 
         //folding Animation 구현부
         recyclerView = findViewById(R.id.recyclerview);
@@ -126,6 +139,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         adapter = new Adapter(MainActivity.this);
         recyclerView.setAdapter(adapter);
 
+
         // swipe 하여 RecyclerView 뿐만 아니라 데이터베이스의 데이터 까지 삭제 적용.
         // 하기 위한 ID 저장 List
         note.addValueEventListener(new ValueEventListener() {
@@ -137,7 +151,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     uidList.add(uidKey);
                 }
             }
-
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Log.e("Uid Collect Method", error.getMessage());
@@ -158,48 +171,46 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 final int position = viewHolder.getBindingAdapterPosition();
                 vi.vibrate(200);
                 note.child(uidList.get(position)).removeValue();
-                note.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        list.clear();
-                        for (DataSnapshot datasnap:snapshot.getChildren()) {
-                            MemoItem memoItem = datasnap.getValue(MemoItem.class);
-                            list.add(memoItem);
-                        }
-                        adapter.notifyDataSetChanged();
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        Log.e("MainActivity", error.getMessage());
-                    }
-                });
+                note.addListenerForSingleValueEvent(new RecyclerViewDataSync(list, memoItem, adapter));
             }
         };
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
         itemTouchHelper.attachToRecyclerView(recyclerView);
 
-        note.addListenerForSingleValueEvent(new ValueEventListener() {
+        note.addListenerForSingleValueEvent(new RecyclerViewDataSync(list, memoItem, adapter));
 
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                list.clear();
-                for (DataSnapshot dataSnapshot:snapshot.getChildren()) {
-                    MemoItem memoItem = dataSnapshot.getValue(MemoItem.class);
-                    list.add(memoItem);
-                }
-                adapter.notifyDataSetChanged();
-            }
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.e("MainActivity", error.getMessage());
-            }
-        });
 
         adapter.setDataToAdapter(list);
 
+    }
 
+    /** 외부 권한 요청 확인 **/
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] ==
+                PackageManager.PERMISSION_GRANTED && grantResults[2] == PackageManager.PERMISSION_GRANTED
+        ) {
+            Log.e("Log", "Permission : " + permissions[0] + "was " + grantResults[0]);
+        }
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.fab_main:
+                onAddButtonClicked();
+                break;
+            case R.id.fab_sub1:
+                intent = new Intent(getApplicationContext(), AddMemo.class);
+                startActivity(intent);
+                break;
+            case R.id.fab_sub2:
+                intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                startActivityForResult(intent, REQUEST_CAMERA);
+                break;
+        }
     }
 
 
@@ -237,19 +248,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         switch (id) {
             case R.id.navi_item_setPw:
-                Intent intent = new Intent(MainActivity.this, PwVerification.class);
+                intent = new Intent(MainActivity.this, PwVerification.class);
                 intent.putExtra("request1", "insert");
                 startActivityForResult(intent, REQUEST_SET_PW);
                 return true;
             case R.id.navi_item_remove:
-                Intent intent1 = new Intent(MainActivity.this, PwVerification.class);
-                intent1.putExtra("request2", "remove");
-                startActivityForResult(intent1, REQUEST_PW_REMOVE);
+                intent = new Intent(MainActivity.this, PwVerification.class);
+                intent.putExtra("request2", "remove");
+                startActivityForResult(intent, REQUEST_PW_REMOVE);
                 return true;
 
             case R.id.navi_item_inquiry:
-                Intent intent2 = new Intent(getApplicationContext(), Inquiry.class);
-                startActivity(intent2);
+                intent = new Intent(getApplicationContext(), Inquiry.class);
+                startActivity(intent);
                 return true;
         }
         return true;
@@ -319,16 +330,54 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (resultCode == RESULT_CANCELED) {
                 Toast.makeText(this, "이미 비밀번호가 설정되어 있습니다.", Toast.LENGTH_SHORT).show();
             } else if (resultCode == RESULT_OK) {
-                Intent intent = new Intent(MainActivity.this, PasswordInsert.class);
+                intent = new Intent(MainActivity.this, PasswordInsert.class);
                 startActivity(intent);
             }
         }else if (requestCode == REQUEST_PW_REMOVE) {
             if (resultCode == RESULT_OK) {
-                Intent intent = new Intent(MainActivity.this, Remove_Password.class);
+                intent = new Intent(MainActivity.this, Remove_Password.class);
                 startActivity(intent);
             } else {
                 Toast.makeText(this, "비밀번호가 설정되어 있지 않습니다.", Toast.LENGTH_SHORT).show();
             }
+        } else if (requestCode == REQUEST_CAMERA) {
+            if (resultCode == RESULT_OK && data != null && data.hasExtra("data")) {
+                Bitmap bitmap = (Bitmap) data.getExtras().get("data");
+                intent = new Intent(MainActivity.this, CameraActivity.class);
+                intent.putExtra("Image", bitmap);
+                startActivity(intent);
+            }
         }
+    }
+
+}
+
+
+
+class RecyclerViewDataSync implements ValueEventListener{
+
+    private ArrayList list;
+    private MemoItem memoItem;
+    private Adapter adapter;
+
+    public RecyclerViewDataSync(ArrayList list, MemoItem memoItem, Adapter adapter) {
+        this.list = list;
+        this.memoItem = memoItem;
+        this.adapter = adapter;
+    }
+
+    @Override
+    public void onDataChange(@NonNull DataSnapshot snapshot) {
+        list.clear();
+        for (DataSnapshot datasnap:snapshot.getChildren()) {
+            MemoItem memoItem = datasnap.getValue(MemoItem.class);
+            list.add(memoItem);
+        }
+        adapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onCancelled(@NonNull DatabaseError error) {
+        Log.e("MainActivity", error.getMessage());
     }
 }

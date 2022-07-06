@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".CameraActivity"
+    android:orientation="vertical"
+    android:background="#DCDCDC">
+
+    <include
+        layout="@layout/toolbar"
+        />
+
+    <ImageView
+        android:layout_marginTop="30dp"
+        android:layout_gravity="center"
+        android:id="@+id/imageView"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:scaleType="fitCenter"/>
+
+    <EditText
+        android:id="@+id/et_title"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:background="@drawable/borderline"
+        android:layout_marginTop="20dp"
+        android:layout_gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textColor="@color/black"
+        android:hint="제목을 입력하세요"
+        android:textColorHint="@color/grey"
+        android:textSize="20sp"
+        android:singleLine="true"
+        android:lines="1"/>
+
+    <EditText
+        android:id="@+id/et_content"
+        android:gravity="top"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:background="@drawable/borderline"
+        android:layout_marginTop="20dp"
+        android:layout_gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text=""
+        android:textColor="@color/black"
+        android:hint="내용을 입력하세요"
+        android:textColorHint="@color/grey"
+        android:textSize="20sp"
+        android:layout_marginBottom="20dp"/>
+
+</LinearLayout>
