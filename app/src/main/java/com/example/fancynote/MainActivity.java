@@ -29,6 +29,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.database.DataSnapshot;
@@ -36,6 +37,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 
@@ -54,6 +57,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private Intent intent;
     private final int REQUEST_CAMERA = 569;
 
+    private FirebaseStorage firebaseStorage = FirebaseStorage.getInstance();
+    private StorageReference storageReference = firebaseStorage.getReference();
+
 
     private Animation rotateOpen,rotateClose,fromBottom,toBottom;
     private boolean clicked = false;
@@ -69,6 +75,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private DatabaseReference database = FirebaseDatabase.getInstance().getReference();
     private DatabaseReference note;
 
+    //TODO 1. Dto 객체에 createDate 값 저장, 차후에 해당 값을 삭제하도록 해볼 것.
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -169,6 +176,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
                 final int position = viewHolder.getBindingAdapterPosition();
                 vi.vibrate(200);
+                StorageReference delImage = storageReference.child("upload/");
+                delImage.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        Toast.makeText(getApplicationContext(), "Storage에서 이미지가 정상적으로 삭제되었습니다!", Toast.LENGTH_SHORT);
+                    }
+                });
                 note.child(uidList.get(position)).removeValue();
                 note.addListenerForSingleValueEvent(new RecyclerViewDataSync(list, memoItem, adapter));
             }
@@ -244,7 +258,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
-
         switch (id) {
             case R.id.navi_item_setPw:
                 intent = new Intent(MainActivity.this, PwVerification.class);

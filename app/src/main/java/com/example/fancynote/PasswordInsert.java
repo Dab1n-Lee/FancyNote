@@ -42,10 +42,10 @@ public class PasswordInsert extends AppCompatActivity {
 
 
 
-        et_first.addTextChangedListener(new CustomTextWatcher(et_first,et_second));
-        et_second.addTextChangedListener(new CustomTextWatcher(et_second,et_third));
-        et_third.addTextChangedListener(new CustomTextWatcher(et_third,et_fourth));
-        et_fourth.addTextChangedListener(new CustomTextWatcher(et_fourth, et_fourth));
+        et_first.addTextChangedListener(new CustomTextWatcher(et_first,et_first,et_second));
+        et_second.addTextChangedListener(new CustomTextWatcher(et_first,et_second,et_third));
+        et_third.addTextChangedListener(new CustomTextWatcher(et_second,et_third,et_fourth));
+        et_fourth.addTextChangedListener(new CustomTextWatcher(et_third,et_fourth, et_fourth));
 
         btn_setting.setOnClickListener((v)->{
             if (et_first.getText().toString() != null && et_second.getText().toString() != null && et_third.getText().toString() != null && et_fourth.getText().toString() != null) {
@@ -57,16 +57,21 @@ public class PasswordInsert extends AppCompatActivity {
                 et_third.setText(null);
                 et_fourth.setText(null);
                 et_first.requestFocus();
-                btn_setting.setOnClickListener((v1)->{
+                btn_setting.setOnClickListener((v1) -> {
                     if (et_first.getText().toString() != null && et_second.getText().toString() != null && et_third.getText().toString() != null && et_fourth.getText().toString() != null) {
                         b = et_first.getText().toString() + et_second.getText().toString() + et_third.getText().toString() + et_fourth.getText().toString();
                         if (a.equals(b)) {
                             Intent intent = new Intent(PasswordInsert.this, PwVerification.class);
                             intent.putExtra("settingPw", b);
-                            startActivityForResult(intent,REQUEST_SETTING_PW);
+                            startActivityForResult(intent, REQUEST_SETTING_PW);
                         }
                     }
                 });
+            } else {
+                vi.vibrate(200);
+                tv_info.setText("비밀번호를 입력해주세요");
+                et_first.setText(null);et_second.setText(null);et_third.setText(null);et_fourth.setText(null);
+                et_first.requestFocus();
             }
         });
 
@@ -93,11 +98,12 @@ public class PasswordInsert extends AppCompatActivity {
 }
 
 class CustomTextWatcher implements TextWatcher {
-    private View v,v1;
+    private View v,v1,v2;
 
-    public CustomTextWatcher(View v, View v1) {
+    public CustomTextWatcher(View v, View v1,View v2) {
         this.v = v;
         this.v1 = v1;
+        this.v2 = v2;
     }
 
     @Override
@@ -107,23 +113,44 @@ class CustomTextWatcher implements TextWatcher {
 
     @Override
     public void onTextChanged(CharSequence s, int start, int before, int count) {
+
     }
 
     @Override
     public void afterTextChanged(Editable s) {
         String text = s.toString();
         if (v.getId() == R.id.et_first) {
-            v.clearFocus();
-            v1.requestFocus();
+            if (text.length() == 1) {
+                v1.clearFocus();
+                v2.requestFocus();
+            } else {
+                v1.clearFocus();
+                v.requestFocus();
+            }
         }else if (v.getId() == R.id.et_second) {
-            v.clearFocus();
-            v1.requestFocus();
+            if (text.length() == 1) {
+                v1.clearFocus();
+                v2.requestFocus();
+            } else {
+                v1.clearFocus();
+                v.requestFocus();
+            }
         } else if (v.getId() == R.id.et_third) {
-            v.clearFocus();
-            v1.requestFocus();
+            if (text.length() == 1) {
+                v1.clearFocus();
+                v2.requestFocus();
+            } else {
+                v1.clearFocus();
+                v.requestFocus();
+            }
         } else if (v.getId() == R.id.et_fourth) {
-            v.clearFocus();
-            v1.requestFocus();
+            if (text.length() == 1) {
+                v1.clearFocus();
+                v2.requestFocus();
+            } else {
+                v1.clearFocus();
+                v.requestFocus();
+            }
         }
 
     }

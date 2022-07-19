@@ -37,7 +37,7 @@ public class AddMemo extends AppCompatActivity {
             String content = et_content.getText().toString();
             String id = database.push().getKey();
 
-            MemoItem memoItem = new MemoItem(title, content,"");
+            MemoItem memoItem = new MemoItem(title, content,"","");
             database.child("note").child(id).setValue(memoItem).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
