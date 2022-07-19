@@ -92,10 +92,10 @@ public class PwVerification extends AppCompatActivity {
         /** 비밀번호를 설정 및 해제를 하기 위한 get Intent 구현부 **/
 
         /** Text Watcher 구현부 **/
-        et_first.addTextChangedListener(new CustomTextWatcher(et_first,et_second));
-        et_second.addTextChangedListener(new CustomTextWatcher(et_second,et_third));
-        et_third.addTextChangedListener(new CustomTextWatcher(et_third,et_fourth));
-        et_fourth.addTextChangedListener(new CustomTextWatcher(et_fourth, et_fourth));
+        et_first.addTextChangedListener(new CustomTextWatcher(et_first,et_first,et_second));
+        et_second.addTextChangedListener(new CustomTextWatcher(et_first,et_second,et_third));
+        et_third.addTextChangedListener(new CustomTextWatcher(et_second,et_third,et_fourth));
+        et_fourth.addTextChangedListener(new CustomTextWatcher(et_third,et_fourth, et_fourth));
         /** Text Watcher 구현부 **/
 
         /** SplashScreen.class 에서 MainActivity.class로 넘어가기 이전 비밀번호 검증부 **/

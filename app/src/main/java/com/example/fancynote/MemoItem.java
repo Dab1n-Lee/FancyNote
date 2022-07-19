@@ -4,13 +4,15 @@ public class MemoItem {
     String title;
     String content;
     String imagePath;
+    String createDate;
 
     public MemoItem(){}
 
-    public MemoItem(String title, String content, String imagePath) {
+    public MemoItem(String title, String content, String imagePath, String createDate) {
         this.title = title;
         this.content = content;
         this.imagePath = imagePath;
+        this.createDate = createDate;
     }
 
     public String getTitle() {
@@ -36,5 +38,12 @@ public class MemoItem {
     public void setImagePath(String imagePath) {
         this.imagePath = imagePath;
     }
+
+    public String getCreateDate() {return createDate;}
+
+    public void setCreateDate(String createDate){
+        this.createDate = createDate;
+    }
+
 }
 

@@ -35,10 +35,10 @@ public class Remove_Password extends AppCompatActivity {
         tv_info = findViewById(R.id.tv_info);
         btn_setting = findViewById(R.id.btn_setting);
 
-        et_first.addTextChangedListener(new CustomTextWatcher(et_first,et_second));
-        et_second.addTextChangedListener(new CustomTextWatcher(et_second,et_third));
-        et_third.addTextChangedListener(new CustomTextWatcher(et_third,et_fourth));
-        et_fourth.addTextChangedListener(new CustomTextWatcher(et_fourth, et_fourth));
+        et_first.addTextChangedListener(new CustomTextWatcher(et_first,et_first,et_second));
+        et_second.addTextChangedListener(new CustomTextWatcher(et_first,et_second,et_third));
+        et_third.addTextChangedListener(new CustomTextWatcher(et_second,et_third,et_fourth));
+        et_fourth.addTextChangedListener(new CustomTextWatcher(et_third,et_fourth, et_fourth));
 
         btn_setting.setOnClickListener((v)->{
             if (et_first.getText().toString() != null && et_second.getText().toString() != null && et_third.getText().toString() != null && et_fourth.getText().toString() != null) {

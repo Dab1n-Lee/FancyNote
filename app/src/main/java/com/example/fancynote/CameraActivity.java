@@ -96,10 +96,11 @@ public class CameraActivity extends AppCompatActivity{
                             String title = et_title.getText().toString();
                             String content = et_content.getText().toString();
                             String imagePath = uri.toString();
+                            String createDate = filename;
 
                             String id = database.push().getKey();
 
-                            MemoItem memoItem = new MemoItem(title, content, imagePath);
+                            MemoItem memoItem = new MemoItem(title, content, imagePath, createDate);
 
                             database.child("note").child(id).setValue(memoItem).addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override

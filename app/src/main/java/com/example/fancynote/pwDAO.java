@@ -14,9 +14,6 @@ public interface pwDAO {
     @Insert
     void setInsert(Password pw);
 
-    @Update
-    void setUpdate(Password pw);
-
     @Delete
     void setDelete(Password pw);
 
